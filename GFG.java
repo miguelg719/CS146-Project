@@ -42,16 +42,16 @@ public class GFG {
 		graph.nVerts = 6;
 
 		// Now, connect some of these users as friends
-		graph.addEdge(0, 2);
-		graph.addEdge(0, 3);
-		graph.addEdge(0, 4);
-		graph.addEdge(5, 2);
-		graph.addEdge(5, 3);
-		graph.addEdge(1, 2);
-		graph.addEdge(4, 3);
-		graph.addEdge(2, 3);
+		graph.addEdge(0, 2, "Jack", "Bill");
+		graph.addEdge(0, 3, "Jack", "Doe");
+		graph.addEdge(0, 4, "Jack", "Dave");
+		graph.addEdge(5, 2, "Duck", "Bill");
+		graph.addEdge(5, 3, "Duck", "Doe");
+		graph.addEdge(1, 2, "John", "Bill");
+		graph.addEdge(4, 3, "Dave", "Doe");
+		graph.addEdge(2, 3, "Bill", "Doe");
 
-		System.out.println("Adj list = "
+		System.out.println("Adjacency list = "
 				+ Arrays.toString(graph.adjacencyList.toArray()));
 
 		Scanner scan = new Scanner(System.in);
@@ -62,16 +62,13 @@ public class GFG {
 
 			System.out.println("Welcome to the social network!");
 			System.out.println("These are your options: \n");
-			System.out.println("1: Create a new profile");
-			System.out.println("2: Delete your existing profile");
-			System.out.println("3: Modify your existing profile: ");
-			System.out.println("4: Search for other profiles");
-			
-			// These two parts haven't been implemented yet
-			System.out.println("5: Add friends from the other profiles");
-			System.out.println("6: View the friends of your friends");
-			
-			System.out.println("7: Print the social media graph");
+			System.out.println("1: Create a new profile:");
+			System.out.println("2: Delete your existing profile:");
+			System.out.println("3: Modify your existing profile:");
+			System.out.println("4: Search for other profiles:");
+			System.out.println("5: Add friends from the other profiles:");
+			System.out.println("6: View the friends of your friends:");
+			System.out.println("7: Print the social media graph:");
 
 			option = scan.nextInt();
 			String bla = scan.nextLine();
@@ -111,7 +108,41 @@ public class GFG {
 				break;
 
 			case 5:
-				graph.addFriends(graph, scan);
+				// Enter the name of the user you want to add as a friend
+				System.out.println("Enter a profile's name to add them as a friend: ");
+				String friendName = scan.nextLine();
+				
+				boolean friendProfileExists = false;
+				
+				// Check if currentUser exists, if not they must create a profile to add friends
+				if(graph.currentUser != null) {
+					for(int i = 0; i < graph.profiles.size(); i++) {
+						
+						// If the user to friend exists, add an edge between currentUser and that user
+						// Also mark "friendProfileExists" as true
+						if(graph.profiles.get(i).getName().equals(friendName)) {
+							
+							friendProfileExists = true;
+							graph.addEdge(graph.profiles.indexOf(graph.currentUser), i,
+									graph.currentUser.getName(), friendName);
+							break;
+						}			
+					}
+					
+				
+					if(friendProfileExists == false) {
+						System.out.println("That profile doesn't exist in the database " +
+								"(name not found). Perhaps you typed the name in wrong -- " +
+								"press 5 and try entering the name again\n");
+					}
+				}
+				
+				else {
+					System.out.println("There is no currently logged in user, so you can't " +
+							"add friends. Press 1 to create a profile, and then add friends" +
+							"after creating a profile\n");
+				}
+
 				break;
 
 			case 6:
@@ -144,14 +175,16 @@ public class GFG {
 		}
 	}
 
-	public void addEdge(int src, int dest) {
-
-		/*
-		 * for(int i = adjacencyList.size(); i <= src; i++) {
-		 * adjacencyList.add(new LinkedList<Integer>()); }
-		 */
+	public void addEdge(int src, int dest, String currentUserName, String friendName) {
 
 		adjacencyList.get(src).add(dest);
+		adjacencyList.get(dest).add(src);
+		
+		System.out.println("Congratulations! You (" + currentUserName + ") have successfully "
+				+ "friended " + friendName + "\n");
+		
+		System.out.println("Adjacency list = "
+				+ Arrays.toString(adjacencyList.toArray()));
 	}
 
 	// Upon adding a user, you are automatically logged in as this new user
@@ -198,7 +231,10 @@ public class GFG {
 			nVerts--;
 
 			System.out.println("Your account ( " + tempCurrentUserName
-					+ " ) has been successfully deleted!\n");
+					+ " ) has been successfully deleted!");
+			
+			System.out.println("Adjacency list = "
+					+ Arrays.toString(adjacencyList.toArray()) + "\n");
 		}
 		
 		else {
@@ -238,41 +274,42 @@ public class GFG {
 		System.out.println();
 	}
 
-	// Add friends to the current user
-	public void addFriends(GFG graph, Scanner scan) {
-
-	}
 
 	// View friends of friends
-	private void viewFriendsOfFriends() {
+	public void viewFriendsOfFriends() {
 
+		if(currentUser != null) {
+			int currentUserIndex = profiles.indexOf(currentUser);
+			LinkedList<Integer> friendsOfCurrentUser = adjacencyList.get(currentUserIndex);
+			
+			// If the user has friends
+			if(!friendsOfCurrentUser.isEmpty()) {
+				LinkedList<Integer> friendsOfFriends = new LinkedList<Integer>();
+				
+				// For each friend of current user, print their friends
+				for(int friendIndex: friendsOfCurrentUser) {
+					
+					friendsOfFriends = adjacencyList.get(friendIndex);
+					System.out.print("Your (" + currentUser.getName() + "\'s) friend " + profiles.get(friendIndex).getName() + " has " +
+							"the friends ");
+					
+					for(int friendsOfFriendIndex: adjacencyList.get(friendIndex)) {
+							System.out.print(profiles.get(friendsOfFriendIndex).getName() + ", ");
+					}
+					
+					System.out.println();
+				}
+				
+				System.out.println("Adjacency list = "
+						+ Arrays.toString(adjacencyList.toArray()));
+			}
+			
+			// If the user has no friends, let them know and encourage them to add friends
+			else {
+				System.out.println("You have no friends at the moment, consider adding some\n");
+			}
+			
+			System.out.println();
+		}
 	}
-
-	/*
-	 * public ArrayList<Edge> kruskal(ArrayList<LinkedList<Integer>>
-	 * adjacencyList, int nVerts) {
-	 * 
-	 * DisjSets ds = new DisjSets(nVerts);
-	 * 
-	 * for(int i = 0; i < nVerts; i++) { Collections.sort(adjacencyList.get(i));
-	 * }
-	 * 
-	 * ArrayList<Edge> mst = new ArrayList<Edge>();
-	 * 
-	 * while (mst.size() != nVerts - 1) {
-	 * 
-	 * Edge e = adjacencyList.get.remove(); int uset = ds.find(e.getu()); int
-	 * vset = ds.find(e.getv());
-	 * 
-	 * if (uset != vset) {
-	 * 
-	 * mst.add(e); ds.union(uset, vset); } }
-	 * 
-	 * int mstTotalWeight = 0; for (Edge e : mst) {
-	 * 
-	 * mstTotalWeight += e.getWeight(); }
-	 * 
-	 * return mst; }
-	 */
-
 }
