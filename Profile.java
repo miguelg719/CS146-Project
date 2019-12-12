@@ -1,3 +1,7 @@
+/*
+ * Partners: Miguel Gonzalez Fernandez and Atul Murali
+ */
+
 public class Profile implements Comparable<Profile>{
 
 	private String name;

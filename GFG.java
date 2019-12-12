@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Scanner;
 
+/*
+ * Partners: Miguel Gonzalez Fernandez and Atul Murali
+ */
+
 public class GFG {
 
 	private int nVerts;
